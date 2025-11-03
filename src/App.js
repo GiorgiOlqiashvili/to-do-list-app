@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import TodoInput from "./components/TodoInput";
 import TodoList from "./components/TodoList";
 import "./App.css";
@@ -7,40 +7,44 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [doneTodos, setDoneTodos] = useState([]);
 
-  const addTodo = (task) => {
+  const addTodo = useCallback((task) => {
     if (task.trim() === "") return;
-    setTodos([...todos, task]);
-  };
+    setTodos((prev) => [...prev, task]);
+  }, []);
 
-  const completeTodo = (index) => {
-    const task = todos[index];
-    setTodos(todos.filter((_, i) => i !== index));
-    setDoneTodos([...doneTodos, task]);
-  };
+  const completeTodo = useCallback((index) => {
+    setTodos((prevTodos) => {
+      const task = prevTodos[index];
+      const newTodos = prevTodos.filter((_, i) => i !== index);
+      setDoneTodos((prevDone) => [...prevDone, task]);
+      return newTodos;
+    });
+  }, []);
 
-  const deleteTodo = (index) => {
-    setDoneTodos(doneTodos.filter((_, i) => i !== index));
-  };
+  const deleteTodo = useCallback((index) => {
+    setDoneTodos((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const moveBackToTodo = (index) => {
-    const task = doneTodos[index];
-    setDoneTodos(doneTodos.filter((_, i) => i !== index));
-    setTodos([...todos, task]);
-  };
+  const moveBackToTodo = useCallback((index) => {
+    setDoneTodos((prevDone) => {
+      const task = prevDone[index];
+      const newDone = prevDone.filter((_, i) => i !== index);
+      setTodos((prevTodos) => [...prevTodos, task]);
+      return newDone;
+    });
+  }, []);
+
+  console.log("🔁 App re-rendered");
 
   return (
     <div className="App">
-      <h1>📝 To-Do List</h1>
+      <h1>📝 Optimized To-Do List</h1>
       <TodoInput onAdd={addTodo} />
 
       <div className="columns">
         <div className="column">
           <h2>შესასრულებელი სამუშაოები</h2>
-          <TodoList
-            items={todos}
-            onAction={completeTodo}
-            type="todo"
-          />
+          <TodoList items={todos} onAction={completeTodo} type="todo" />
         </div>
 
         <div className="column">

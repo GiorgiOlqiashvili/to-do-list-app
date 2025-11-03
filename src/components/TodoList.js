@@ -1,6 +1,8 @@
-import React from "react";
+import React, { memo } from "react";
 
-function TodoList({ items, onAction, onDelete, onMoveBack, type }) {
+const TodoList = memo(({ items, onAction, onDelete, onMoveBack, type }) => {
+  console.log(`📋 ${type === "todo" ? "To-Do" : "Done"} List rendered`);
+
   return (
     <ul className="todo-list">
       {items.length === 0 ? (
@@ -25,6 +27,7 @@ function TodoList({ items, onAction, onDelete, onMoveBack, type }) {
       )}
     </ul>
   );
-}
+});
 
 export default TodoList;
+

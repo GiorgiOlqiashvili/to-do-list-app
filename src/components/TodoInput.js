@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 
-function TodoInput({ onAdd }) {
+const TodoInput = memo(({ onAdd }) => {
   const [task, setTask] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (task.trim() === "") return;
     onAdd(task);
     setTask("");
   };
+
+  console.log("🎯 TodoInput rendered");
 
   return (
     <form onSubmit={handleSubmit} className="todo-input">
@@ -20,6 +23,6 @@ function TodoInput({ onAdd }) {
       <button type="submit">➕ დამატება</button>
     </form>
   );
-}
+});
 
 export default TodoInput;
