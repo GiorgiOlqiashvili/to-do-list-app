@@ -1,30 +1,23 @@
 import React, { memo } from "react";
+import TodoItem from "./TodoItem";
 
-const TodoList = memo(({ items, onAction, onDelete, onMoveBack, type }) => {
-  console.log(`📋 ${type === "todo" ? "To-Do" : "Done"} List rendered`);
+const TodoList = memo(({ items, onComplete, onDelete, onMoveBack, type }) => {
+  console.log(`📋 ${type} list rendered`);
+
+  if (!items.length) return <p className="empty">ცარიელია</p>;
 
   return (
     <ul className="todo-list">
-      {items.length === 0 ? (
-        <p className="empty">ცარიელია</p>
-      ) : (
-        items.map((item, index) => (
-          <li key={index} className="todo-item">
-            <span>{item}</span>
-            <div className="buttons">
-              {type === "todo" && (
-                <button onClick={() => onAction(index)}>✅ დასრულება</button>
-              )}
-              {type === "done" && (
-                <>
-                  <button onClick={() => onMoveBack(index)}>↩️ დაბრუნება</button>
-                  <button onClick={() => onDelete(index)}>❌ წაშლა</button>
-                </>
-              )}
-            </div>
-          </li>
-        ))
-      )}
+      {items.map((item) => (
+        <TodoItem
+          key={item.id}
+          item={item}
+          onComplete={onComplete}
+          onDelete={onDelete}
+          onMoveBack={onMoveBack}
+          type={type}
+        />
+      ))}
     </ul>
   );
 });

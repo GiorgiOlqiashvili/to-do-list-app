@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import TodoInput from "./components/TodoInput";
 import TodoList from "./components/TodoList";
 import "./App.css";
@@ -9,48 +9,56 @@ function App() {
 
   const addTodo = useCallback((task) => {
     if (task.trim() === "") return;
-    setTodos((prev) => [...prev, task]);
+    setTodos((prev) => [...prev, { id: Date.now(), text: task }]);
   }, []);
 
-  const completeTodo = useCallback((index) => {
-    setTodos((prevTodos) => {
-      const task = prevTodos[index];
-      const newTodos = prevTodos.filter((_, i) => i !== index);
-      setDoneTodos((prevDone) => [...prevDone, task]);
-      return newTodos;
+  const completeTodo = useCallback((id) => {
+    setTodos((prev) => {
+      const todo = prev.find((t) => t.id === id);
+      if (!todo) return prev;
+      setDoneTodos((donePrev) => [...donePrev, todo]);
+      return prev.filter((t) => t.id !== id);
     });
   }, []);
 
-  const deleteTodo = useCallback((index) => {
-    setDoneTodos((prev) => prev.filter((_, i) => i !== index));
+  const deleteTodo = useCallback((id) => {
+    setDoneTodos((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const moveBackToTodo = useCallback((index) => {
-    setDoneTodos((prevDone) => {
-      const task = prevDone[index];
-      const newDone = prevDone.filter((_, i) => i !== index);
-      setTodos((prevTodos) => [...prevTodos, task]);
-      return newDone;
+  const moveBackToTodo = useCallback((id) => {
+    setDoneTodos((prev) => {
+      const todo = prev.find((t) => t.id === id);
+      if (!todo) return prev;
+      setTodos((prevTodos) => [...prevTodos, todo]);
+      return prev.filter((t) => t.id !== id);
     });
   }, []);
 
-  console.log("🔁 App re-rendered");
+  // useMemo to avoid re-creating lists on every render
+  const todoList = useMemo(() => todos, [todos]);
+  const doneList = useMemo(() => doneTodos, [doneTodos]);
+
+  console.log("🔁 App rendered");
 
   return (
     <div className="App">
-      <h1>📝 Optimized To-Do List</h1>
+      <h1>📝 Hook-based Optimized To-Do List</h1>
       <TodoInput onAdd={addTodo} />
 
       <div className="columns">
         <div className="column">
           <h2>შესასრულებელი სამუშაოები</h2>
-          <TodoList items={todos} onAction={completeTodo} type="todo" />
+          <TodoList
+            items={todoList}
+            onComplete={completeTodo}
+            type="todo"
+          />
         </div>
 
         <div className="column">
           <h2>შესრულებული სამუშაოები</h2>
           <TodoList
-            items={doneTodos}
+            items={doneList}
             onDelete={deleteTodo}
             onMoveBack={moveBackToTodo}
             type="done"
